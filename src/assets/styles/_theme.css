@@ -1,0 +1,13 @@
+[theme="light"] {
+    --primary_bgc: #fff;
+    --primary_ft_clr: #007bff;
+    --first_ft_clr: #000;
+    --second_ft_clr: #8e8282;
+}
+
+[theme="dark"] {
+    --primary_bgc: #000;
+    --primary_ft_clr: #007bff;
+    --first_ft_clr: #e7e7e7;
+    --second_ft_clr: #8e8282;
+}

@@ -1,0 +1,28 @@
+* {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+    -ms-overflow-style: none;
+    overflow: -moz-scrollbars-none;
+}
+
+*::-webkit-scrollbar {
+    width: 0 !important
+}
+
+body {
+    --primary_clr: #007bff;
+}
+
+ul {
+    display: flex;
+}
+
+li {
+    list-style: none;
+}
+
+input {
+    outline: 0;
+}
