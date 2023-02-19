@@ -11,7 +11,6 @@ export const useCourseStore = defineStore("course", {
     },
     actions: {
         modify(key, value) {
-            console.log(123)
             this[key] = value
         }
     }

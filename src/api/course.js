@@ -1,6 +1,5 @@
 import request from "@/utils/request"
 
-
 /**
  * 获取一级分类
  * @returns 
@@ -48,13 +47,18 @@ export const getNewCourse = async () => {
     return list
 }
 
-export const getCategoryInfo = async (categoryId) => {
-    const data = await request({
-        url: "/course/category/get",
-        method: "GET",
-        params: {
-            categoryId
-        }
+/**
+ * 查询课程
+ */
+export const queryCourse = async (queryInfo) => {
+    const { data: { pageInfo } } = await request({
+        url: "/course/search",
+        method: "POST",
+        data: queryInfo
     })
-    return data
+    return {
+        list: pageInfo.list,
+        totalPages: pageInfo.lastPage,
+        total: pageInfo.total
+    }
 }

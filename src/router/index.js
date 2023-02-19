@@ -8,15 +8,12 @@ const router = createRouter({
 
 // 全局前置守卫...
 router.beforeEach((to, from, next) => {
-	document.title = "小鹿线" + mapNameToTitle[to.name]
-	if(to.meta.requiredLogin) {
-		// ...
-	} else next()
+	next()
 })
 
 // 全局后置守卫...
 router.afterEach((to, from, failure) => {
-	
+	document.title = "小鹿线" + mapNameToTitle[to.name]
 })
 
 export default router

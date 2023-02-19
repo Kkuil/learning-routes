@@ -10,7 +10,9 @@ import "element-plus/dist/index.css"
 import "swiper/css"
 import "swiper/css/pagination"
 
-import { fullScreenLoading } from '@/directives/fullScreen'
+import * as ElementPlusIconsVue from "@element-plus/icons-vue"
+
+import { fullScreenLoading } from "@/directives/fullScreen"
 
 import ElementPlus from "element-plus"
 
@@ -25,5 +27,9 @@ app.use(router)
 
 // 全局指令
 app.directive("fullScreen", fullScreenLoading)
+
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+}
 
 app.mount("#app")

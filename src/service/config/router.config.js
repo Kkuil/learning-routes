@@ -26,7 +26,7 @@ export const routes = [
             {
                 path: "course",
                 name: "Category",
-                component: () => import("@/views/Course/views/Category/Category.vue")
+                component: defineAsyncComponent(() => import("@/views/Course/views/Category/Category.vue"))
             },
             {
                 path: "course",

@@ -1,6 +1,8 @@
 <script setup>
 import { computed, defineProps } from "vue"
+import { useRouter } from "vue-router"
 
+const $router = useRouter()
 const $props = defineProps(["item"])
 
 const isShowVipFree = computed(() => {
@@ -15,10 +17,14 @@ const isShowDiscount = computed(() => {
     return $props.item?.discountPrice > 0
 })
 
+const goDetails = async () => {
+    $router.push(`/course/detail/${$props.item}`)
+}
+
 </script>
 
 <template>
-    <div class="course-card">
+    <div class="course-card" @click="goDetails">
         <div class="li-top">
             <div class="li-img">
                 <img :src="$props.item?.courseCover" :alt="$props.item?.courseName" :title="$props.item?.courseName" />

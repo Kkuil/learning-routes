@@ -1,20 +1,93 @@
 <script setup>
-
-
-import { mapState, mapActions } from "pinia"
+import { useRoute } from "vue-router"
+import { mapState } from "pinia"
 import { useCourseStore } from "@/stores/course"
-import { onMounted } from "@vue/runtime-core"
-import { getCategory } from "../../../../hooks/useCategory";
+import { onMounted, ref, watch } from "vue"
+import { getCategory } from "@/hooks/useCategory"
+import { queryCourse } from "@/api/course"
+import CourseCard from "@/components/CourseCard.vue"
 
+let pageInfo = ref({
+    list: [],
+    total: 8,
+    totalPages: 1
+})
+const searchParams = ref({
+    pageNum: 1,
+    pageSize: 8,
+    activeKeys: {
+        firstCategory: 0,
+        secondCategory: 0,
+        sortBy: "",
+        courseLevel: 0,
+    },
+    isMember: 0,
+    isFree: 0,
+})
+const $route = useRoute()
 const courseState = {
     ...mapState(useCourseStore, ["cates"])
 }
 
-onMounted(() => {
-    if (!courseState.cates().first.length) {
-        getCategory()
+watch(searchParams, async (nValue) => {
+    const {
+        pageNum,
+        pageSize,
+        activeKeys: {
+            firstCategory,
+            secondCategory,
+            sortBy,
+            courseLevel,
+        },
+        isMember,
+        isFree
+    } = nValue
+    const data = await queryCourse({
+        pageNum,
+        pageSize,
+        entity: {
+            firstCategory,
+            secondCategory,
+            isMember,
+            isFree,
+            courseLevel,
+            sortBy
+        }
+    })
+    pageInfo.value = {
+        ...pageInfo,
+        ...data
     }
+}, {
+    deep: true,
+    immediate: true
 })
+
+const sortType = () => {
+    if (searchParams.value.activeKeys.sortBy === "price-asc") {
+        searchParams.value.activeKeys.sortBy = "price-desc"
+    } else {
+        searchParams.value.activeKeys.sortBy = "price-asc"
+    }
+}
+
+const changeInfo = (keys, value) => {
+    if (keys.length <= 1) {
+        searchParams.value[keys[0]] = value
+    } else {
+        deepIterator(searchParams.value, keys, value)
+    }
+}
+
+const deepIterator = (iterator, keys, value) => {
+    if (keys.length == 1) {
+        iterator[keys[0]] = value
+    } else {
+        deepIterator(iterator[keys[0]], keys.slice(1), value)
+    }
+}
+
+onMounted(getCategory)
 
 </script>
 
@@ -27,8 +100,11 @@ onMounted(() => {
                     <i class="iconfont icon-arrow-right-bold"></i>
                 </b>
                 <ul>
-                    <li class="active">全部</li>
-                    <li v-for="first in courseState.cates().first" :key="first.id">
+                    <li :class="{ active: !searchParams.activeKeys.firstCategory }"
+                        @click="searchParams.activeKeys.firstCategory = 0">全部</li>
+                    <li v-for="first in courseState.cates().first" :key="first.id"
+                        :class="{ active: searchParams.activeKeys.firstCategory == first.id }"
+                        @click="searchParams.activeKeys.firstCategory = first.id">
                         {{ first.categoryName }}
                     </li>
                 </ul>
@@ -39,8 +115,11 @@ onMounted(() => {
                     <i class="iconfont icon-arrow-right-bold"></i>
                 </b>
                 <ul>
-                    <li class="active">全部</li>
-                    <li v-for="second in courseState.cates().second.flat(1)" :key="second.id">
+                    <li :class="{ active: !searchParams.activeKeys.secondCategory }"
+                        @click="searchParams.activeKeys.secondCategory = 0">全部</li>
+                    <li v-for="second in courseState.cates().second.flat(1)" :key="second.id"
+                        :class="{ active: searchParams.activeKeys.secondCategory == second.id }"
+                        @click="searchParams.activeKeys.secondCategory = second.id">
                         {{ second.categoryName }}
                     </li>
                 </ul>
@@ -51,17 +130,72 @@ onMounted(() => {
                     <i class="iconfont icon-arrow-right-bold"></i>
                 </b>
                 <ul>
-                    <li class="active">全部</li>
-                    <li>初级</li>
-                    <li>中级</li>
-                    <li>高级</li>
+                    <li :class="{ active: !searchParams.activeKeys.courseLevel }"
+                        @click="searchParams.activeKeys.courseLevel = 0">全部</li>
+                    <li :class="{ active: searchParams.activeKeys.courseLevel == 1 }"
+                        @click="searchParams.activeKeys.courseLevel = 1">初级</li>
+                    <li :class="{ active: searchParams.activeKeys.courseLevel == 2 }"
+                        @click="searchParams.activeKeys.courseLevel = 2">中级</li>
+                    <li :class="{ active: searchParams.activeKeys.courseLevel == 3 }"
+                        @click="searchParams.activeKeys.courseLevel = 3">高级</li>
                 </ul>
             </div>
+        </div>
+        <div class="sort_selection">
+            <div class="sortBy">
+                <ul>
+                    <li class="words" :class="{ active: !searchParams.activeKeys.sortBy }"
+                        @click="changeInfo(['activeKeys', 'sortBy'], '')">综合</li>
+                    <li class="split">|</li>
+                    <li class="words" :class="{ active: searchParams.activeKeys.sortBy === 'time-asc' }"
+                        @click="changeInfo(['activeKeys', 'sortBy'], 'time-asc')">最新课程</li>
+                    <li class="split">|</li>
+                    <li class="words" :class="{ active: searchParams.activeKeys.sortBy === 'purchase-asc' }"
+                        @click="changeInfo(['activeKeys', 'sortBy'], 'purchase-asc')">最多购买</li>
+                    <li class="split">|</li>
+                    <li class="words price" :class="{ active: /price/.test(searchParams.activeKeys.sortBy) }"
+                        @click="sortType">
+                        <span>价格</span>
+                        <div class="icon flex">
+                            <el-icon>
+                                <CaretTop :class="{ active: searchParams.activeKeys.sortBy === 'price-asc' }"/>
+                            </el-icon>
+                            <el-icon>
+                                <CaretBottom :class="{ active: searchParams.activeKeys.sortBy === 'price-desc' }"/>
+                            </el-icon>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="selection">
+                <div class="free_course flex_center">
+                    <input type="checkbox" :checked="searchParams.isFree"
+                        @change="changeInfo(['isFree'], $event.target.checked ? 1 : 0)">
+                    <span>免费课程</span>
+                </div>
+                <div class="vip_course flex_center">
+                    <input type="checkbox" :checked="searchParams.isMember"
+                        @change="changeInfo(['isMember'], $event.target.checked ? 1 : 0)">
+                    <span>会员课程</span>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <CourseCard class="item" v-for="item in pageInfo.list" :key="item.id" :item="item"></CourseCard>
+            <div v-show="!pageInfo.list.length" class="empty flex_center">
+                <el-empty description="什么都没有" />
+            </div>
+        </div>
+        <div v-show="pageInfo.list.length" class="pagination flex_center">
+            <el-pagination small background layout="prev, pager, next" :total="pageInfo.total"
+                :page-count="pageInfo.totalPages" class="mt-4" @current-change="(page) => changeInfo(['pageNum'], page)" />
         </div>
 </div>
 </template>
 
 <style scoped lang="scss">
+$selection_ft: 14px;
+
 .category {
     width: 1140px;
 
@@ -109,5 +243,88 @@ onMounted(() => {
                 }
             }
         }
+    }
+
+    .sort_selection {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+
+        .sortBy {
+            width: 300px;
+
+            ul {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+
+                li {
+                    font-size: $selection_ft;
+                }
+
+                .price {
+                    display: flex;
+
+                    >.icon {
+                        width: 20px;
+                        height: 25px;
+                        margin-left: 3px;
+                        align-items: center;
+                        justify-content: center;
+                        flex-direction: column;
+                        .el-icon {
+                            color: #ccc;
+                        }
+                        .active {
+                            color: #000;
+                        }
+                    }
+                }
+
+                li[class^=words] {
+                    cursor: pointer;
+                }
+
+                li[class^=split] {
+                    color: #ccc;
+                }
+
+                .active {
+                    color: var(--primary_ft_clr);
+                }
+            }
+        }
+
+        .selection {
+            font-size: $selection_ft;
+            display: flex;
+
+            >div {
+                margin: 0 5px;
+
+                input {
+                    margin-right: 2px;
+                }
+            }
+        }
+    }
+
+    .list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+
+        .empty {
+            width: 100%;
+            min-height: 200px;
+        }
+
+        .item {
+            margin-left: 12px;
+        }
+    }
+
+    .pagination {
+        margin: 10px 0;
     }
 }</style>

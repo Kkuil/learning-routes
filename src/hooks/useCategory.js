@@ -16,13 +16,15 @@ const courseState = {
 }
 
 export const getCategory = async () => {
-    const first = await getFirstCates()
-    courseActions.set("cates", {
-        first
-    })
-    for (var i = 0; i < first.length; i++) {
+    if (!courseState.cates().first.length) {
+        const first = await getFirstCates()
         courseActions.set("cates", {
-            second: [...courseState.cates().second, await getSecondCates(first[i].id)]
+            first
         })
+        for (var i = 0; i < first.length; i++) {
+            courseActions.set("cates", {
+                second: [...courseState.cates().second, await getSecondCates(first[i].id)]
+            })
+        }
     }
 }
