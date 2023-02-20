@@ -1,9 +1,19 @@
 <script setup>
+import { defineProps } from 'vue'
+
+const $props = defineProps({
+    bgi: {
+        type: String,
+        required: true
+    }
+})
+
+
 
 </script>
 
 <template>
-    <div class="nav_bg" :style="`background-image: url(https://oss.xuexiluxian.cn/xiaoluxian-vcr/8c6ee4cf7fb54425987871b9a2f52f2e.png);`"></div>
+    <div class="nav_bg" :style="`background-image: url(${$props.bgi});`"></div>
 </template>
 
 <style scoped lang="scss">

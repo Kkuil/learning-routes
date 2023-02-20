@@ -1,6 +1,10 @@
+import { getCartInfo } from "@/api/shopping_cart"
 import { defineAsyncComponent } from "vue"
 import Error from "@/components/Error.vue"
 import Loading from "@/components/Loading.vue"
+import msgTips from "@/service/msgTips"
+import { useRouter } from "vue-router"
+import storage from "../../utils/storage"
 
 // routes 
 export const routes = [
@@ -71,6 +75,31 @@ export const routes = [
                 component: () => import("@/views/Feedback/Feedback.vue")
             },
             {
+                path: "cart",
+                name: "Cart",
+                component: () => import("@/views/Cart/Cart.vue"),
+                beforeEnter: async (to, from, next) => {
+                    const token = storage.getItem("accessToken")
+                    if (token) {
+                        const list = await getCartInfo()
+                        if (!list) {
+                            msgTips.error("Query Error", 2000)
+                            const $router = useRouter()
+                            $router.replace("/login")
+                            return
+                        }
+                        // 合并参数
+                        to.params = {
+                            ...to.params,
+                            list
+                        }
+                        next()
+                    } else {
+                        msgTips.error("您还未登录，请先登录后再查看吧！", 2000)
+                    }
+                }
+            },
+            {
                 path: "/:path(.*)",
                 name: "NotFound",
                 component: () => import("@/views/NotFound/NotFound.vue")
@@ -124,5 +153,6 @@ export const mapNameToTitle = {
     SysClass: "-系统班",
     Detail: "-课程详情",
     Category: "-课程分类",
+    Cart: "-购物车",
     NotFound: "404不存在"
 }

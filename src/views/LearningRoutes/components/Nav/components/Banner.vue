@@ -1,13 +1,12 @@
 <script setup>
-
 import { Swiper, SwiperSlide } from "swiper/vue"
-import { Pagination } from "swiper"
+import { Pagination, Autoplay } from "swiper"
 import { getBanners } from "@/api/nav";
 import { onMounted } from "@vue/runtime-core";
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 
-const modules = [Pagination]
+const modules = [Pagination, Autoplay]
 const $router = useRouter()
 const banners = reactive({
     images: []
@@ -30,7 +29,7 @@ const checkDetail = (path) => {
 
 <template>
     <div class="banner">
-        <swiper :pagination="true" :autoplay="true" :loop="true" :modules="modules" class="swiper">
+        <swiper :loop="true" :modules="modules" class="swiper">
             <swiper-slide v-for="item in banners.images" class="swiper-slide" @click="checkDetail(item.pcHref)" :key="item.pcHref">
                 <img :src="item.imageUrl" :alt="item.imageName" :title="item.imageName" />
             </swiper-slide>

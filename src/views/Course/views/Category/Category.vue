@@ -1,5 +1,5 @@
 <script setup>
-import { useRoute } from "vue-router"
+import { useRoute, useRouter } from "vue-router"
 import { mapState } from "pinia"
 import { useCourseStore } from "@/stores/course"
 import { onMounted, ref, watch } from "vue"
@@ -16,8 +16,8 @@ const searchParams = ref({
     pageNum: 1,
     pageSize: 8,
     activeKeys: {
-        firstCategory: 0,
-        secondCategory: 0,
+        firstCategory: '-1',
+        secondCategory: '-1',
         sortBy: "",
         courseLevel: 0,
     },
@@ -25,6 +25,7 @@ const searchParams = ref({
     isFree: 0,
 })
 const $route = useRoute()
+const $router = useRouter()
 const courseState = {
     ...mapState(useCourseStore, ["cates"])
 }
@@ -46,8 +47,8 @@ watch(searchParams, async (nValue) => {
         pageNum,
         pageSize,
         entity: {
-            firstCategory,
-            secondCategory,
+            firstCategory: firstCategory == '-1' ? 0 : firstCategory,
+            secondCategory: secondCategory == '-1' ? 0 : secondCategory,
             isMember,
             isFree,
             courseLevel,
@@ -63,6 +64,17 @@ watch(searchParams, async (nValue) => {
     immediate: true
 })
 
+watch(() => $route.query, ({ firstCategory = '-1', secondCategory = '-1' }) => {
+    // 合并参数
+    searchParams.value.activeKeys = {
+        ...searchParams.value.activeKeys,
+        firstCategory,
+        secondCategory
+    }
+}, {
+    immediate: true
+})
+
 const sortType = () => {
     if (searchParams.value.activeKeys.sortBy === "price-asc") {
         searchParams.value.activeKeys.sortBy = "price-desc"
@@ -71,7 +83,16 @@ const sortType = () => {
     }
 }
 
+/**
+ * 修改查询信息
+ * @param {Array} keys 
+ * @param {String} value 
+ */
 const changeInfo = (keys, value) => {
+    if (keys.includes("firstCategory")) {
+        console.log(123)
+        getCategory(value)
+    }
     if (keys.length <= 1) {
         searchParams.value[keys[0]] = value
     } else {
@@ -87,7 +108,9 @@ const deepIterator = (iterator, keys, value) => {
     }
 }
 
-onMounted(getCategory)
+onMounted(() => {
+    getCategory(searchParams.value.activeKeys.firstCategory)
+})
 
 </script>
 
@@ -100,11 +123,11 @@ onMounted(getCategory)
                     <i class="iconfont icon-arrow-right-bold"></i>
                 </b>
                 <ul>
-                    <li :class="{ active: !searchParams.activeKeys.firstCategory }"
-                        @click="searchParams.activeKeys.firstCategory = 0">全部</li>
+                    <li :class="{ active: searchParams.activeKeys.firstCategory == '-1' }"
+                        @click="changeInfo(['activeKeys', 'firstCategory'], '-1')">全部</li>
                     <li v-for="first in courseState.cates().first" :key="first.id"
                         :class="{ active: searchParams.activeKeys.firstCategory == first.id }"
-                        @click="searchParams.activeKeys.firstCategory = first.id">
+                        @click="changeInfo(['activeKeys', 'firstCategory'], first.id)">
                         {{ first.categoryName }}
                     </li>
                 </ul>
@@ -115,9 +138,9 @@ onMounted(getCategory)
                     <i class="iconfont icon-arrow-right-bold"></i>
                 </b>
                 <ul>
-                    <li :class="{ active: !searchParams.activeKeys.secondCategory }"
-                        @click="searchParams.activeKeys.secondCategory = 0">全部</li>
-                    <li v-for="second in courseState.cates().second.flat(1)" :key="second.id"
+                    <li :class="{ active: searchParams.activeKeys.secondCategory == '-1' }"
+                        @click="searchParams.activeKeys.secondCategory = '-1'">全部</li>
+                    <li v-for="second in courseState.cates().second" :key="second.id"
                         :class="{ active: searchParams.activeKeys.secondCategory == second.id }"
                         @click="searchParams.activeKeys.secondCategory = second.id">
                         {{ second.categoryName }}
@@ -158,10 +181,10 @@ onMounted(getCategory)
                         <span>价格</span>
                         <div class="icon flex">
                             <el-icon>
-                                <CaretTop :class="{ active: searchParams.activeKeys.sortBy === 'price-asc' }"/>
+                                <CaretTop :class="{ active: searchParams.activeKeys.sortBy === 'price-asc' }" />
                             </el-icon>
                             <el-icon>
-                                <CaretBottom :class="{ active: searchParams.activeKeys.sortBy === 'price-desc' }"/>
+                                <CaretBottom :class="{ active: searchParams.activeKeys.sortBy === 'price-desc' }" />
                             </el-icon>
                         </div>
                     </li>
@@ -190,7 +213,7 @@ onMounted(getCategory)
             <el-pagination small background layout="prev, pager, next" :total="pageInfo.total"
                 :page-count="pageInfo.totalPages" class="mt-4" @current-change="(page) => changeInfo(['pageNum'], page)" />
         </div>
-</div>
+    </div>
 </template>
 
 <style scoped lang="scss">
@@ -235,6 +258,11 @@ $selection_ft: 14px;
                     cursor: pointer;
                     padding: 0 8px;
                     margin: 0 15px 10px;
+
+                    &:hover {
+                        background-color: #dee9fa;
+                        color: var(--primary_ft_clr);
+                    }
                 }
 
                 .active {
@@ -272,9 +300,11 @@ $selection_ft: 14px;
                         align-items: center;
                         justify-content: center;
                         flex-direction: column;
+
                         .el-icon {
                             color: #ccc;
                         }
+
                         .active {
                             color: #000;
                         }
@@ -320,11 +350,21 @@ $selection_ft: 14px;
         }
 
         .item {
-            margin-left: 12px;
+            transition: transform .3s;
+            margin: 0 20px 20px 0;
+
+            &:nth-child(4n) {
+                margin-right: 0;
+            }
+
+            &:hover {
+                transform: translateY(-10px);
+            }
         }
     }
 
     .pagination {
         margin: 10px 0;
     }
-}</style>
+}
+</style>

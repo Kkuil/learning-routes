@@ -1,8 +1,7 @@
 <script setup>
-
-import { onMounted } from "vue"
+import { computed, onMounted } from "vue"
 import { useRouter } from "vue-router"
-import { getCategory } from "@/hooks/useCategory"
+import { getCategory, filter } from "@/hooks/useCategory"
 import { mapState } from "pinia"
 import { useCourseStore } from "@/stores/course"
 
@@ -11,11 +10,13 @@ const courseState = {
     ...mapState(useCourseStore, ["cates"])
 }
 
-onMounted(getCategory)
+onMounted(() => {
+    getCategory(-1)
+})
 
 // 跳至分类页
-const goCategory = async (courseId) => {
-    $router.push(`/course?cate=${courseId}`)
+const goCategory = async (flag, courseId) => {
+    $router.push(`/course?${flag === 1 ? "firstCategory" : "secondCategory"}=${courseId}&&${flag === 1 ? "secondCategory" : "firstCategory"}=-1`)
 }
 
 </script>
@@ -23,22 +24,20 @@ const goCategory = async (courseId) => {
 <template>
     <div class="navigation">
         <ul>
-            <li v-for="first, index in courseState.cates().first" class="first" @click="goCategory(first.id)"
-                :key="first.id">
-                <span>{{ first.categoryName }}</span>
+            <li v-for="first in courseState.cates().first" class="first" @click="goCategory(1, first.id)" :key="first.id">
+                <h3 class="first_title">{{ first.categoryName }}</h3>
                 <div class="second">
-                    <ul class="flex_center">
-                        <li class="flex_center" v-for="second in courseState.cates().second[index].slice(0, 2)"
-                            :key="second.id">
+                    <ul>
+                        <li class="flex_center" v-for="second in filter(first.id).slice(0, 2)" :key="second.id">
                             <i>&nbsp;|&nbsp;</i>
-                            <span @click.stop="goCategory(second.id)">{{ second.categoryName }}</span>
+                            <span @click.stop="goCategory(2, second.id)">{{ second.categoryName }}</span>
                         </li>
                     </ul>
                 </div>
                 <i class="iconfont icon-arrow-right-bold"></i>
             </li>
         </ul>
-</div>
+    </div>
 </template>
 
 <style scoped lang="scss">
@@ -52,7 +51,7 @@ const goCategory = async (courseId) => {
         display: flex;
         flex-direction: column;
 
-        >li {
+        .first {
             position: relative;
             display: flex;
             cursor: pointer;
@@ -61,9 +60,13 @@ const goCategory = async (courseId) => {
             padding: 0 10px;
             width: 100%;
             height: 58px;
-
+            .first_title {
+                min-width: 70px;
+                padding: 0 3px;
+            }
             .second {
                 ul {
+                    white-space: nowrap;
                     li {
                         font-size: 10px;
                     }
@@ -82,4 +85,5 @@ const goCategory = async (courseId) => {
             }
         }
     }
-}</style>
+}
+</style>

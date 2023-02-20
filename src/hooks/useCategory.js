@@ -15,16 +15,15 @@ const courseState = {
     ...mapState(useCourseStore, ["cates"])
 }
 
-export const getCategory = async () => {
-    if (!courseState.cates().first.length) {
-        const first = await getFirstCates()
-        courseActions.set("cates", {
-            first
-        })
-        for (var i = 0; i < first.length; i++) {
-            courseActions.set("cates", {
-                second: [...courseState.cates().second, await getSecondCates(first[i].id)]
-            })
-        }
-    }
+export const getCategory = async (categoryId) => {
+    const first = await getFirstCates()
+    courseActions.set("cates", {
+        first,
+        second: await getSecondCates(categoryId)
+    })
+}
+
+// 过滤
+export const filter = (parentId) => {
+    return courseState.cates().second.filter(item => item.parentId === parentId)
 }

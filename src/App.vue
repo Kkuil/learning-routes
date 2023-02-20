@@ -21,5 +21,3 @@ import Loading from "@/components/Loading.vue"
 		</template>
 </RouterView>
 </template>
-
-<style lang="scss" scoped></style>
