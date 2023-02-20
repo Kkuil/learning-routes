@@ -12,5 +12,4 @@ import NewCourse from './components/NewCourse/NewCourse.vue'
 </template>
 
 <style scoped lang="scss">
-
 </style>

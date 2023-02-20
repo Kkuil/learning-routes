@@ -3,32 +3,25 @@ import Checkbox from "@/components/Checkbox.vue"
 import { getCartInfo } from "@/api/shopping_cart"
 import { onMounted, ref } from "vue"
 import { useRoute, useRouter } from "vue-router"
+import { MapNumToLevel } from "./cart.constant"
+import Cart from "../Cart"
 
-const list = ref([])
+const list = ref({})
 const $route = useRoute()
 const $router = useRouter()
 
-// 课程难度map表
-const mapNumToLevel = {
-    1: "低级",
-    2: "中级",
-    3: "高级"
-}
-
 const checkedAll = (isChecked) => {
-    console.log(isChecked)
+    list.value.setAllCheckedOrNot(isChecked)
 }
 
 onMounted(() => {
-    list.value = $route.params.list
-    console.log(list.value)
+    list.value = new Cart($route.params.list)
 })
 
-// 计算每样商品的总价
-const sumGoodsPerGoods = (price, num) => {
-    return price * num
+// 选中商品
+const checkOrNot = (id, isChecked) => {
+    list.value.checkedOrNot(id, isChecked)
 }
-
 
 </script>
 
@@ -45,7 +38,7 @@ const sumGoodsPerGoods = (price, num) => {
             <div class="content">
                 <div class="tb_header">
                     <div class="tb_item">
-                        <Checkbox @check="checkedAll"></Checkbox>
+                        <Checkbox @check="checkedAll" :Checked="list.isAllChecked"></Checkbox>
                         <span>全选</span>
                     </div>
                     <div class="tb_item">课程信息</div>
@@ -55,21 +48,21 @@ const sumGoodsPerGoods = (price, num) => {
                     <div class="tb_item">操作</div>
                 </div>
                 <div class="tb_content">
-                    <div v-if="list.length" class="list">
-                        <div v-for="item in list" :key="item.id" class="item">
-                            <Checkbox />
-                            <img :src="item.courseCover" :alt="item.courseName" :title="item.courseName" class="cover">
+                    <div v-if="list.goodsList?.length" class="list">
+                        <div v-for="item in list.goodsList" :key="item.goods.id" class="item">
+                            <Checkbox @check="(isChecked) => checkOrNot(item.goods.id, isChecked)" :Checked="item.isChecked"/>
+                            <img :src="item.goods.courseCover" :alt="item.goods.courseName" :title="item.goods.courseName" class="cover">
                             <div class="text">
-                                <div class="course_name">{{ item.courseName }}</div>
-                                <div class="course_level">课程难度：{{ mapNumToLevel[item.courseLevel] }}</div>
-                                <div class="course_description">{{ item.description ? item.description : "该课程暂无更多介绍" }}</div>
+                                <div class="course_name">{{ item.goods.courseName }}</div>
+                                <div class="course_level">课程难度：{{ MapNumToLevel[item.goods.courseLevel] }}</div>
+                                <div class="course_description">{{ item.goods.description ? item.goods.description : "该课程暂无更多介绍" }}</div>
                             </div>
                             <div class="price">
-                                <div class="origin_price">￥{{ item.salePrice.toFixed(2) }}</div>
-                                <div class="cur_price">￥{{ item.discountPrice.toFixed(2) }}</div>
+                                <div class="origin_price">￥{{ item.goods.salePrice.toFixed(2) }}</div>
+                                <div class="cur_price">￥{{ item.goods.discountPrice.toFixed(2) }}</div>
                             </div>
-                            <div class="selected_num">{{ item.counter }}</div>
-                            <div class="pay_price">{{ sumGoodsPerGoods(item.discountPrice, item.counter) }}</div>
+                            <div class="selected_num">{{ item.goods.counter }}</div>
+                            <div class="pay_price">{{ item.computeSumPrice() }}</div>
                             <i class="iconfont icon-shanchu delete">删除</i>
                         </div>
                     </div>
@@ -80,11 +73,11 @@ const sumGoodsPerGoods = (price, num) => {
                 <div class="tb_footer">
                     <div class="selected_num">
                         <span class="word">已选课程</span>
-                        <span class="number">0</span>
+                        <span class="number">{{ list.checkedGoods?.length }}</span>
                     </div>
                     <div class="sum_price">
                         <span class="word">合计</span>
-                        <span class="number">0.00</span>
+                        <span class="number">{{ list.sumPrice?.toFixed(2) }}</span>
                     </div>
                     <button class="go_pay"
                         :style="{ width: '100px', height: '45px', backgroundColor: '#c82333', borderRadius: '22.5px', color: '#fff', fontWeight: 'bold' }">去结算</button>
@@ -98,7 +91,7 @@ const sumGoodsPerGoods = (price, num) => {
 <style scoped lang="scss">
 .shopping_cart {
     color: var(--first_ft_clr);
-
+    z-index: 1;
     .title {
         font-size: 20px;
         font-weight: bolder;
@@ -159,10 +152,10 @@ const sumGoodsPerGoods = (price, num) => {
                 :nth-child(1) {
                     display: flex;
                     align-items: center;
-                    left: 10px;
+                    left: 1.4%;
 
                     >span {
-                        margin-left: 3px;
+                        margin-left: 5px;
                     }
                 }
 
@@ -215,6 +208,9 @@ const sumGoodsPerGoods = (price, num) => {
                             .course_name {
                                 font-size: 18px;
                                 font-weight: bolder;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
                             }
                             .course_level {
                                 font-size: 14px;
@@ -231,6 +227,7 @@ const sumGoodsPerGoods = (price, num) => {
                         }
 
                         .price {
+                            width: 75px;
                             margin-left: 8%;
                             .origin_price {
                                 color: #ccc;
@@ -243,6 +240,7 @@ const sumGoodsPerGoods = (price, num) => {
                         }
 
                         .pay_price {
+                            width: 45px;
                             margin-left: 15%;
                         }
 

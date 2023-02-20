@@ -218,10 +218,9 @@ onMounted(() => {
 
 <style scoped lang="scss">
 $selection_ft: 14px;
-
 .category {
     width: 1140px;
-
+    color: var(--first_ft_clr);
     .select_cate {
         padding: 10px;
         width: 100%;

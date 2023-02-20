@@ -31,6 +31,14 @@ export default {
             isChecked: false
         }
     },
+    watch: {
+        Checked: {
+            handler(value) {
+                this.isChecked = value
+            },
+            immediate: true
+        }
+    },
     methods: {
         checked() {
             this.isChecked = !this.isChecked

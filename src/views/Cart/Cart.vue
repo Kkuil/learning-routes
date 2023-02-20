@@ -15,7 +15,7 @@ import ShoppingCart from "./components/ShoppingCart/ShoppingCart.vue"
 .cart {
     width: 100%;
     .bgc {
-        z-index: -1;
+        z-index: 0;
         position: absolute;
         top: 100px;
     }

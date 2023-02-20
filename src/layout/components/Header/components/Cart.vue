@@ -39,7 +39,7 @@ const goDetail = async (e) => {
                 <span>已加入{{ cart_goods.length }}门课程</span>
             </div>
             <div class="goods" @click="goDetail">
-                <div v-for="item in cart_goods" :key="item.id" class="item" :data-id="item.id">
+                <div v-for="item in cart_goods.slice(0, 3)" :key="item.id" class="item" :data-id="item.id">
                     <div class="wrapper flex">
                         <img class="cover" :src="item.courseCover" />
                         <div class="right">
@@ -158,6 +158,9 @@ const goDetail = async (e) => {
                         }
                         .description {
                             color: #ccc;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
                         }
                         .price {
                             font-weight: bolder;

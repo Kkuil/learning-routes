@@ -68,7 +68,7 @@ const goDetails = async () => {
     transition: margin-top 0.2s;
     -webkit-transition: margin-top 0.2s;
     overflow: hidden;
-
+    color: var(--first_ft_clr);
     &:hover {
         margin-top: -5px;
     }

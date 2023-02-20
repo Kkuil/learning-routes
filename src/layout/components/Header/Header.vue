@@ -12,7 +12,7 @@ import Avatar from "./components/Avatar.vue"
 import NavBg from "@/views/LearningRoutes/components/Nav/components/NavBg.vue"
 
 const userInfo = {
-    ...mapState(useUserStore, ["userInfo"])
+	...mapState(useUserStore, ["userInfo"])
 }
 const $router = useRouter()
 
@@ -36,7 +36,7 @@ const returnIndex = () => {
 		<Cart />
 		<MyCourse />
 		<Avatar />
-		<NavBg bgi="https://oss.xuexiluxian.cn/xiaoluxian-vcr/8c6ee4cf7fb54425987871b9a2f52f2e.png"/>
+		<NavBg bgi="https://oss.xuexiluxian.cn/xiaoluxian-vcr/8c6ee4cf7fb54425987871b9a2f52f2e.png" />
 	</div>
 </template>
 
@@ -49,7 +49,6 @@ const returnIndex = () => {
 	padding: 0 10%;
 	box-shadow: 0 0 3px 2px #ccc;
 	background-color: var(--primary_bgc);
-
 	.logo {
 		width: 140px;
 		height: 100%;
@@ -60,9 +59,6 @@ const returnIndex = () => {
 			cursor: pointer;
 		}
 	}
-
-
-
 
 }
 </style>

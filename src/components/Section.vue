@@ -32,7 +32,7 @@ const $props = defineProps(["title"])
 
     .title {
         display: flex;
-
+        margin-top: 40px;
         .content-title-left {
             display: flex;
 

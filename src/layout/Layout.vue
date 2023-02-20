@@ -19,12 +19,12 @@ export default {
 	<div class="content flex_center">
 		<RouterView></RouterView>
 	</div>
-<Footer />
+	<Footer />
 </template>
 
 <style lang="scss" scoped>
 .content {
-    min-width: 1140px;
+	min-width: 1140px;
 	padding: 30px 0;
 }
 </style>
